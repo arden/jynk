@@ -14,7 +14,7 @@ export function ProductPage() {
   const [error, setError] = useState<string | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   
-  const { connected: solanaConnected } = useWallet();
+  const { } = useWallet();
 
   useEffect(() => {
     const loadProduct = async () => {
