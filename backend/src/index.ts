@@ -223,13 +223,14 @@ const app = new Elysia()
     return { success: true, data: purchases };
   })
 
-  .listen(3000);
+  .listen(process.env.PORT || 3000);
 
+const port = process.env.PORT || 3000;
 console.log(`
 🦊 Jynk Backend Server
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🌐 Server: http://localhost:3000
-📊 Health:  http://localhost:3000/health
+🌐 Server: http://localhost:${port}
+📊 Health:  http://localhost:${port}/health
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `);
 
