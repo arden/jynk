@@ -1,12 +1,8 @@
 import { useState } from 'react';
-import { useAccount } from 'wagmi';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { formatUSDC } from '../utils';
-import { useX402Payment } from '../hooks/useX402Payment';
 import { useSolanaPayment } from '../hooks/useSolanaPayment';
 import type { Product } from '../types';
-
-type NetworkType = 'base' | 'solana';
 
 interface ProductModalProps {
   product: Product;
@@ -15,30 +11,20 @@ interface ProductModalProps {
 }
 
 export function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
-  const { isConnected: evmConnected } = useAccount();
   const { connected: solanaConnected } = useWallet();
   
   const [txHash, setTxHash] = useState<string | null>(null);
-  const [selectedNetwork, setSelectedNetwork] = useState<NetworkType>(
-    solanaConnected ? 'solana' : evmConnected ? 'base' : 'solana'
-  );
-
   const isFree = product.price === 0;
-  const isConnected = selectedNetwork === 'base' ? evmConnected : solanaConnected;
+  const isConnected = solanaConnected;
 
   const handlePaymentSuccess = (result: { txHash?: string; unlockedContent: string }) => {
     if (result.txHash) {
       setTxHash(result.txHash);
-      // Note: Purchase tracking would need to be implemented via API
       onSuccess?.(result.txHash);
     }
   };
 
-  const evmPayment = useX402Payment({ onSuccess: handlePaymentSuccess });
-  const solanaPayment = useSolanaPayment({ onSuccess: handlePaymentSuccess });
-
-  const currentPayment = selectedNetwork === 'base' ? evmPayment : solanaPayment;
-  const { status, error, isProcessing } = currentPayment;
+  const { status, error, isProcessing, pay } = useSolanaPayment({ onSuccess: handlePaymentSuccess });
 
   const handlePay = () => {
     if (isFree) {
@@ -51,22 +37,12 @@ export function ProductModal({ product, onClose, onSuccess }: ProductModalProps)
       return;
     }
 
-    if (selectedNetwork === 'base') {
-      evmPayment.payDirect({
-        productId: product.id,
-        payTo: product.creatorAddress,
-        amount: product.price,
-        network: 'base',
-        resource: product.targetUrl,
-      });
-    } else {
-      solanaPayment.pay({
-        productId: product.id,
-        payTo: product.creatorAddress,
-        amount: product.price,
-        resource: product.targetUrl,
-      });
-    }
+    pay({
+      productId: product.id,
+      payTo: product.creatorAddress,
+      amount: product.price,
+      resource: product.targetUrl,
+    });
   };
 
   const handleAccessContent = () => {
@@ -125,40 +101,14 @@ export function ProductModal({ product, onClose, onSuccess }: ProductModalProps)
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-slate-500">Network</span>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setSelectedNetwork('base')}
-                          disabled={isProcessing}
-                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
-                            selectedNetwork === 'base'
-                              ? 'bg-blue-500 text-white'
-                              : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
-                          } ${!evmConnected ? 'opacity-50' : ''}`}
-                        >
-                          Base
-                        </button>
-                        <button
-                          onClick={() => setSelectedNetwork('solana')}
-                          disabled={isProcessing}
-                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
-                            selectedNetwork === 'solana'
-                              ? 'bg-purple-500 text-white'
-                              : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
-                          } ${!solanaConnected ? 'opacity-50' : ''}`}
-                        >
-                          Solana
-                        </button>
-                      </div>
+                      <span className="text-white font-medium">Solana</span>
                     </div>
                   </div>
 
                   {!isConnected && (
                     <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3">
                       <p className="text-amber-400 text-sm text-center">
-                        {selectedNetwork === 'base' 
-                          ? 'Connect an EVM wallet (MetaMask, Coinbase) to pay with Base'
-                          : 'Connect a Solana wallet (Phantom) to pay with Solana'
-                        }
+                        Connect a Solana wallet (Phantom) to pay
                       </p>
                     </div>
                   )}
@@ -189,16 +139,16 @@ export function ProductModal({ product, onClose, onSuccess }: ProductModalProps)
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                 </svg>
-                {isProcessing ? 'Processing...' : isFree ? 'Get Access' : `Pay with ${selectedNetwork === 'base' ? 'Base' : 'Solana'}`}
+                {isProcessing ? 'Processing...' : isFree ? 'Get Access' : 'Pay with Solana'}
               </button>
 
               {!isFree && (
                 <div className="flex items-center justify-center gap-2 mt-4 text-slate-600 text-xs">
-                  <span>MetaMask</span>
-                  <span>•</span>
-                  <span>Coinbase</span>
-                  <span>•</span>
                   <span>Phantom</span>
+                  <span>•</span>
+                  <span>Solflare</span>
+                  <span>•</span>
+                  <span>Backpack</span>
                 </div>
               )}
             </>
