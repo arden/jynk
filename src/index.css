@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #f0f9ff;
+  --color-primary-100: #e0f2fe;
+  --color-primary-200: #bae6fd;
+  --color-primary-300: #7dd3fc;
+  --color-primary-400: #38bdf8;
+  --color-primary-500: #0ea5e9;
+  --color-primary-600: #0284c7;
+  --color-primary-700: #0369a1;
+  --color-primary-800: #075985;
+  --color-primary-900: #0c4a6e;
+}
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #0f172a;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+@layer components {
+  .btn-primary {
+    background-color: var(--color-primary-500);
+    color: white;
+    font-weight: 500;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--color-primary-600);
+  }
+  
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .btn-secondary {
+    background-color: #334155;
+    color: white;
+    font-weight: 500;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+    border: 1px solid #475569;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #475569;
+  }
+
+  .btn-wallet {
+    background: linear-gradient(to right, var(--color-primary-500), var(--color-primary-600));
+    color: white;
+    font-weight: 600;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.75rem;
+    transition: all 0.2s;
+    box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.25);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+  }
+  
+  .btn-wallet:hover {
+    background: linear-gradient(to right, var(--color-primary-400), var(--color-primary-500));
+    box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.4);
+  }
+  
+  .input-field {
+    width: 100%;
+    background-color: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: white;
+  }
+  
+  .input-field::placeholder {
+    color: #94a3b8;
+  }
+  
+  .input-field:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: var(--color-primary-500);
+    border-color: transparent;
+  }
+  
+  .card {
+    background-color: rgba(30, 41, 59, 0.5);
+    backdrop-filter: blur(4px);
+    border: 1px solid #334155;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
