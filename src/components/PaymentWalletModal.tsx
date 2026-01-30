@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import { useWallet, Wallet } from '@solana/wallet-adapter-react';
 import type { Product } from '../types';
 import { formatUSDC, decryptUrl, shortenAddress } from '../utils';
-import { useStore } from '../store';
 import { useSolanaPayment, type SolanaPaymentStatus } from '../hooks';
 
 interface PaymentWalletModalProps {
@@ -68,7 +67,6 @@ export function PaymentWalletModal({ product, onClose }: PaymentWalletModalProps
     disconnect,
     wallets
   } = useWallet();
-  const { setWalletType } = useStore();
 
   const { status, pay, isProcessing } = useSolanaPayment({
     onSuccess: (result) => {
@@ -137,7 +135,7 @@ export function PaymentWalletModal({ product, onClose }: PaymentWalletModalProps
       select(wallet.adapter.name);
       await new Promise(resolve => setTimeout(resolve, 100));
       await connect();
-      setWalletType('solana');
+      // Wallet connected successfully
       setStep('confirm');
     } catch (error: any) {
       console.error('Connection failed:', error);
@@ -351,7 +349,7 @@ export function PaymentWalletModal({ product, onClose }: PaymentWalletModalProps
             </button>
 
             <p className="text-center text-xs text-slate-500 mt-4">
-              Secured by x402 Protocol
+              Secured by Solana
             </p>
           </div>
 

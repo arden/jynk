@@ -7,7 +7,7 @@ import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
   address: text('address').notNull().unique(),
-  walletType: text('wallet_type', { enum: ['evm', 'solana'] }).notNull(),
+  walletType: text('wallet_type').notNull().default('solana'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
 });
 
@@ -49,7 +49,7 @@ export const purchases = sqliteTable('purchases', {
   productId: text('product_id').notNull(),
   buyerAddress: text('buyer_address').notNull(),
   txHash: text('tx_hash').notNull(),
-  network: text('network', { enum: ['base', 'solana'] }).notNull(),
+  network: text('network').notNull().default('solana'),
   amount: real('amount').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
 });

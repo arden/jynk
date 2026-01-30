@@ -136,31 +136,21 @@ export const UsernameApi = {
   },
 };
 
-// Payment API
+// Payment API - Solana only
 export const PaymentApi = {
-  async verifyX402(
-    productId: string,
-    paymentPayload: string,
-    buyerAddress: string
-  ): Promise<ApiResponse<{ txHash: string; unlockedContent: string }>> {
-    return fetchApi(`${API_BASE_URL}/api/x402/verify/${productId}`, {
-      method: 'POST',
-      headers: {
-        'X-PAYMENT': paymentPayload,
-        'X-BUYER-ADDRESS': buyerAddress,
-      },
-    });
-  },
-
-  async directPay(
+  async verifyPayment(
     productId: string,
     txHash: string,
-    network: 'base' | 'solana',
     buyerAddress: string
   ): Promise<ApiResponse<{ txHash: string; unlockedContent: string }>> {
     return fetchApi(`${API_BASE_URL}/api/pay/direct`, {
       method: 'POST',
-      body: JSON.stringify({ productId, txHash, network, buyerAddress }),
+      body: JSON.stringify({ 
+        productId, 
+        txHash, 
+        network: 'solana', 
+        buyerAddress 
+      }),
     });
   },
 };

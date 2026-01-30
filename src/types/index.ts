@@ -57,15 +57,12 @@ export interface Purchase {
   productId: string;
   buyerAddress: string;
   txHash: string;
-  network: 'base' | 'solana';
+  network: 'solana';
   amount: number;
   createdAt: number;
 }
 
-export type WalletType = 'evm' | 'solana';
-
 export interface WalletState {
   connected: boolean;
   address: string | null;
-  walletType: WalletType | null;
 }

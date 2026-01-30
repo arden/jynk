@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import type { Product } from '../types';
 import { formatUSDC, decryptUrl, shortenAddress } from '../utils';
-import { useStore } from '../store';
 import { useSolanaPayment, type SolanaPaymentStatus } from '../hooks';
 
 type PaymentStep = 'product' | 'wallet-select' | 'confirm' | 'success';
@@ -30,7 +29,6 @@ export function PaymentModal({ product, onClose }: PaymentModalProps) {
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
   const { publicKey, connected, select, connect, disconnect, wallets } = useWallet();
-  const { setWalletType } = useStore();
   const { status, pay, isProcessing } = useSolanaPayment({
     onSuccess: (result) => {
       setTxHash(result.txHash);
@@ -73,7 +71,7 @@ export function PaymentModal({ product, onClose }: PaymentModalProps) {
       select(wallet.adapter.name);
       await new Promise(resolve => setTimeout(resolve, 100));
       await connect();
-      setWalletType('solana');
+      // Wallet connected
       setStep('confirm');
     } catch (error: any) {
       console.error('Connection failed:', error);
@@ -339,7 +337,7 @@ export function PaymentModal({ product, onClose }: PaymentModalProps) {
             </button>
 
             <p className="text-center text-xs text-slate-500 mt-4">
-              Secured by x402 Protocol
+              Secured by Solana
             </p>
           </div>
 

@@ -148,11 +148,13 @@ export function StorePage() {
             </button>
 
             {showShare && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 z-20 w-screen max-w-md px-4">
-                <ShareMenu 
-                  url={window.location.href} 
-                  title={`Check out ${profile.displayName}'s store on Jynk!`} 
-                />
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 z-20 w-screen max-w-sm px-4 sm:px-0">
+                <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
+                  <ShareMenu 
+                    url={window.location.href} 
+                    title={`Check out ${profile.displayName}'s store on Jynk!`} 
+                  />
+                </div>
               </div>
             )}
           </div>

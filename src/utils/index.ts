@@ -16,11 +16,28 @@ export const formatUSDC = (amount: number) => {
 };
 
 export const encryptUrl = (url: string): string => {
-  return btoa(url);
+  try {
+    const encoded = btoa(url);
+    const obfuscated = encoded.split('').reverse().join('');
+    const withPrefix = `jynk_${obfuscated}`;
+    return btoa(withPrefix);
+  } catch {
+    return btoa(url);
+  }
 };
 
 export const decryptUrl = (encrypted: string): string => {
-  return atob(encrypted);
+  try {
+    const decoded = atob(encrypted);
+    if (!decoded.startsWith('jynk_')) {
+      return atob(encrypted);
+    }
+    const obfuscated = decoded.replace('jynk_', '');
+    const encoded = obfuscated.split('').reverse().join('');
+    return atob(encoded);
+  } catch {
+    return '';
+  }
 };
 
 export const isValidUrl = (url: string): boolean => {

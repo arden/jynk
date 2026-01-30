@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Product, Creator, WalletType, StoreProfile } from '../types';
+import type { Product, Creator, StoreProfile } from '../types';
 import { DEFAULT_THEME } from '../config/themes';
 import { ProductApi, StoreApi, UsernameApi } from '../services/api';
 
@@ -52,11 +52,9 @@ function convertProfile(apiProfile: any, address: string): StoreProfile {
 
 interface AppState {
   currentUser: Creator | null;
-  walletType: WalletType | null;
   
   // Actions
   setCurrentUser: (user: Creator | null) => void;
-  setWalletType: (type: WalletType | null) => void;
   
   // Products
   fetchProducts: (address: string, includeInactive?: boolean) => Promise<Product[]>;
@@ -76,10 +74,8 @@ interface AppState {
 
 export const useStore = create<AppState>()((set) => ({
   currentUser: null,
-  walletType: null,
 
   setCurrentUser: (user) => set({ currentUser: user }),
-  setWalletType: (type) => set({ walletType: type }),
 
   // Products
   fetchProducts: async (address: string, includeInactive = false) => {

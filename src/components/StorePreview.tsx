@@ -74,11 +74,9 @@ export function StorePreview({
             )}
 
             <div className={`mt-4 flex items-center justify-center gap-3 text-[10px] ${themeConfig.colors.textMuted}`}>
-              <span>144 views</span>
+              <span>{products.reduce((acc, p) => acc + p.soldCount, 0)} sales</span>
               <span className="w-0.5 h-0.5 bg-current rounded-full opacity-30" />
-              <span>19 buyers</span>
-              <span className="w-0.5 h-0.5 bg-current rounded-full opacity-30" />
-              <span>$9.396 earned</span>
+              <span>{products.length} products</span>
             </div>
 
             <div className="mt-4">

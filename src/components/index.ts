@@ -6,3 +6,5 @@ export { ProductCard } from './ProductCard';
 export { ProductModal } from './ProductModal';
 export { PaymentModal } from './PaymentModal';
 export { EditProductModal } from './EditProductModal';
+export { ProductManager } from './ProductManager';
+export { StorePreview } from './StorePreview';

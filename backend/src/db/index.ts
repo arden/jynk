@@ -132,7 +132,9 @@ async function initDatabase() {
   db.run(`CREATE INDEX IF NOT EXISTS idx_products_active ON products(is_active)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_purchases_product ON purchases(product_id)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_purchases_buyer ON purchases(buyer_address)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_purchases_tx_hash ON purchases(tx_hash)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_social_links_address ON social_links(address)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_store_profiles_username ON store_profiles(username)`);
 
   saveDatabase();
   isInitialized = true;
@@ -177,8 +179,16 @@ function run(sql: string, params: unknown[] = []) {
 
 // ============ Product Functions ============
 
-export async function getProductById(id: string) {
+export async function getProductById(id: string, includeInactive = false) {
+  if (includeInactive) {
+    return getOne('SELECT * FROM products WHERE id = ?', [id]);
+  }
   return getOne('SELECT * FROM products WHERE id = ? AND is_active = 1', [id]);
+}
+
+export async function getProductByIdInternal(id: string) {
+  // Internal use only - bypasses is_active check for payment verification
+  return getOne('SELECT * FROM products WHERE id = ?', [id]);
 }
 
 export async function getProductsByCreator(address: string, includeInactive = false) {
@@ -231,9 +241,9 @@ export async function updateProduct(id: string, data: Record<string, unknown>) {
 }
 
 export async function updateProductSales(id: string) {
-  const product = await getProductById(id);
+  const product = await getProductByIdInternal(id);
   if (product) {
-    run('UPDATE products SET sold_count = ? WHERE id = ?', [product.sold_count + 1, id]);
+    run('UPDATE products SET sold_count = ? WHERE id = ?', [(product.sold_count || 0) + 1, id]);
   }
 }
 
@@ -340,6 +350,14 @@ export async function addPurchase(data: Record<string, unknown>) {
     'INSERT INTO purchases (id, product_id, buyer_address, tx_hash, network, amount) VALUES (?, ?, ?, ?, ?, ?)',
     [data.id, data.productId, data.buyerAddress, data.txHash, data.network, data.amount]
   );
+}
+
+export async function getPurchaseByTxHash(txHash: string) {
+  return getOne('SELECT * FROM purchases WHERE tx_hash = ? LIMIT 1', [txHash]);
+}
+
+export async function updateProfileEarnings(address: string, amount: number) {
+  run('UPDATE store_profiles SET total_earned = total_earned + ? WHERE address = ?', [amount, address]);
 }
 
 export async function getPurchasesByProduct(productId: string) {

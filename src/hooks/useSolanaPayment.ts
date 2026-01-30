@@ -8,7 +8,7 @@ import {
   getAccount,
   TokenAccountNotFoundError,
 } from '@solana/spl-token';
-import { getUsdcMint, USDC_DECIMALS } from '../config/solana';
+import { getUsdcMint, USDC_DECIMALS, getFallbackConnection } from '../config/solana';
 import { PaymentApi } from '../services/api';
 
 export type SolanaPaymentStatus = 'idle' | 'signing' | 'submitting' | 'verifying' | 'success' | 'error';
@@ -25,12 +25,24 @@ interface SolanaPaymentRequest {
   resource: string;
 }
 
+// Helper function to check if error is RPC related
+const isRpcError = (error: any): boolean => {
+  if (!error) return false;
+  const message = error.message || String(error);
+  return message.includes('403') || 
+         message.includes('Access forbidden') ||
+         message.includes('rate limit') ||
+         message.includes('timeout') ||
+         message.includes('fetch') ||
+         message.includes('network');
+};
+
 export function useSolanaPayment(options: UseSolanaPaymentOptions = {}) {
   const [status, setStatus] = useState<SolanaPaymentStatus>('idle');
   const [error, setError] = useState<string>('');
 
   const { publicKey, sendTransaction } = useWallet();
-  const { connection } = useConnection();
+  const { connection: primaryConnection } = useConnection();
 
   const pay = useCallback(async (request: SolanaPaymentRequest) => {
     if (!publicKey) {
@@ -41,6 +53,10 @@ export function useSolanaPayment(options: UseSolanaPaymentOptions = {}) {
 
     setStatus('signing');
     setError('');
+
+    // Try with primary connection first, fallback if needed
+    let connection = primaryConnection;
+    
 
     try {
       const usdcMint = getUsdcMint();
@@ -56,10 +72,33 @@ export function useSolanaPayment(options: UseSolanaPaymentOptions = {}) {
 
       const transaction = new Transaction();
 
+      // Try to get account info - if RPC fails, switch to fallback
       try {
         await getAccount(connection, recipientAta);
       } catch (err) {
-        if (err instanceof TokenAccountNotFoundError) {
+        if (isRpcError(err)) {
+          console.warn('Primary RPC failed, switching to fallback...');
+          connection = getFallbackConnection();
+          
+          // Retry with fallback
+          try {
+            await getAccount(connection, recipientAta);
+          } catch (fallbackErr) {
+            // If fallback also fails, check if it's TokenAccountNotFoundError
+            if (fallbackErr instanceof TokenAccountNotFoundError) {
+              transaction.add(
+                createAssociatedTokenAccountInstruction(
+                  publicKey,
+                  recipientAta,
+                  recipientPubkey,
+                  usdcMint
+                )
+              );
+            } else {
+              throw fallbackErr;
+            }
+          }
+        } else if (err instanceof TokenAccountNotFoundError) {
           transaction.add(
             createAssociatedTokenAccountInstruction(
               publicKey,
@@ -99,7 +138,7 @@ export function useSolanaPayment(options: UseSolanaPaymentOptions = {}) {
       });
 
       // Use backend API to record payment
-      const response = await PaymentApi.directPay(request.productId, signature, 'solana', publicKey.toBase58());
+      const response = await PaymentApi.verifyPayment(request.productId, signature, publicKey.toBase58());
 
       setStatus('success');
 
@@ -111,11 +150,22 @@ export function useSolanaPayment(options: UseSolanaPaymentOptions = {}) {
       return { txHash: signature, unlockedContent: request.resource };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Payment failed';
-      setError(errorMessage);
+      
+      // Provide user-friendly error messages
+      let userFriendlyError = errorMessage;
+      if (isRpcError(err)) {
+        userFriendlyError = 'Network connection issue. Please check your internet connection and try again.';
+      } else if (errorMessage.includes('insufficient funds')) {
+        userFriendlyError = 'Insufficient USDC balance. Please add funds to your wallet.';
+      } else if (errorMessage.includes('User rejected')) {
+        userFriendlyError = 'Transaction was cancelled.';
+      }
+      
+      setError(userFriendlyError);
       setStatus('error');
       options.onError?.(err instanceof Error ? err : new Error(errorMessage));
     }
-  }, [publicKey, connection, sendTransaction, options]);
+  }, [publicKey, primaryConnection, sendTransaction, options]);
 
   const reset = useCallback(() => {
     setStatus('idle');

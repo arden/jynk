@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { PaymentWalletModal } from '../components/PaymentWalletModal';
+import { ProductModal } from '../components/ProductModal';
 import { formatUSDC, shortenAddress } from '../utils';
 import { API_BASE_URL } from '../services/api';
 import type { Product, StoreProfile } from '../types';
@@ -12,7 +12,7 @@ export function ProductPage() {
   const [creatorProfile, setCreatorProfile] = useState<StoreProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   
   const { } = useWallet();
 
@@ -102,11 +102,11 @@ export function ProductPage() {
   const username = creatorProfile?.displayName?.replace(/^@/, '') || shortenAddress(product.creatorAddress, 6);
   const avatarLetter = displayName.charAt(0).toUpperCase();
 
-  const handlePayClick = () => {
+  const handleProductClick = () => {
     if (isFree) {
       window.open(product.targetUrl, '_blank');
     } else {
-      setShowPaymentModal(true);
+      setSelectedProduct(product);
     }
   };
 
@@ -140,7 +140,7 @@ export function ProductPage() {
 
         {/* Pay Button */}
         <button
-          onClick={handlePayClick}
+          onClick={handleProductClick}
           disabled={isSoldOut}
           className="w-full py-4 bg-blue-500 hover:bg-blue-600 disabled:bg-slate-700 disabled:cursor-not-allowed text-slate-900 font-semibold rounded-xl transition-colors"
         >
@@ -159,9 +159,12 @@ export function ProductPage() {
         </svg>
       </Link>
 
-      {/* Payment Modal */}
-      {showPaymentModal && product && (
-        <PaymentWalletModal product={product} onClose={() => setShowPaymentModal(false)} />
+      {/* Product Modal - Same as StorePage */}
+      {selectedProduct && (
+        <ProductModal
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+        />
       )}
     </div>
   );

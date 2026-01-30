@@ -98,49 +98,40 @@ export function ShareMenu({ url, title }: ShareMenuProps) {
   ];
 
   return (
-    <div className="flex flex-col gap-4 w-full">
-      <div className="bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl p-3 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-300 w-full">
-        <div className="flex items-center justify-center gap-2.5 overflow-x-visible pb-1 scrollbar-hide no-scrollbar">
+    <div className="flex flex-col gap-3 w-full">
+      <div className="p-4">
+        <p className="text-slate-400 text-sm mb-4 text-center">Share this store</p>
+        <div className="grid grid-cols-4 gap-3">
           {shareOptions.map((option) => (
-            <div key={option.name} className="relative group flex flex-col items-center">
-              <button
-                onClick={option.action}
-                className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-95 ${option.color} ${option.name === 'QR Code' && showQR ? 'ring-2 ring-primary-500' : ''}`}
-              >
+            <button
+              key={option.name}
+              onClick={option.action}
+              className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all active:scale-95 ${option.color} ${option.name === 'QR Code' && showQR ? 'ring-2 ring-primary-500' : ''}`}
+            >
+              <div className="w-8 h-8 flex items-center justify-center">
                 {option.name === 'Copy Link' && copied ? (
-                  <svg className="w-4.5 h-4.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 ) : option.icon}
-              </button>
-              
-              {/* Tooltip */}
-              <div className="absolute top-full mt-2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-lg z-30 border border-white/5 transform translate-y-1 group-hover:translate-y-0">
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 border-l border-t border-white/5 rotate-45" />
-                {option.name}
               </div>
-            </div>
+              <span className="text-[10px] font-medium">{option.name}</span>
+            </button>
           ))}
         </div>
       </div>
 
       {showQR && (
-        <div className="bg-white p-4 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col items-center gap-3 border border-slate-200 self-center">
+        <div className="border-t border-slate-800 p-4 flex flex-col items-center gap-3">
           <QRCodeCanvas 
             value={url} 
-            size={160}
+            size={180}
             level="H"
             includeMargin={true}
-            imageSettings={{
-              src: "/vite.svg",
-              x: undefined,
-              y: undefined,
-              height: 24,
-              width: 24,
-              excavate: true,
-            }}
+            bgColor="#0f172a"
+            fgColor="#ffffff"
           />
-          <p className="text-slate-900 text-[10px] font-medium opacity-60">Scan to visit store</p>
+          <p className="text-slate-500 text-xs">Scan to visit store</p>
         </div>
       )}
     </div>

@@ -35,7 +35,7 @@ export interface Purchase {
   product_id: string;
   buyer_address: string;
   tx_hash: string;
-  network: 'base' | 'solana';
+  network: 'solana';
   amount: number;
   created_at: number;
 }
@@ -43,7 +43,7 @@ export interface Purchase {
 export interface User {
   id: string;
   address: string;
-  wallet_type: 'evm' | 'solana';
+  wallet_type: 'solana';
   created_at: number;
 }
 
@@ -64,28 +64,11 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 // Payment types
 export interface PaymentVerificationRequest {
   productId: string;
-  payment: string; // x402 payment payload
+  txHash: string;
+  buyerAddress: string;
 }
 
 export interface PaymentVerificationResponse {
   txHash: string;
   unlockedContent: string;
-}
-
-// x402 types
-export interface X402PaymentPayload {
-  x402Version: number;
-  scheme: 'exact';
-  network: string;
-  payload: {
-    signature: string;
-    authorization: {
-      from: string;
-      to: string;
-      value: string;
-      validAfter: string;
-      validBefore: string;
-      nonce: string;
-    };
-  };
 }
